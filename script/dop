@@ -78,11 +78,11 @@ BDATA=alignments-backward-startpos_${SEQ2_NAME}_${SEQ1_NAME}.tsv
 tail -n +1 $BDATA >> $FDATA
 FIG=${OUTDIR}/${SEQ1_NAME}_${SEQ2_NAME}_${KMER}.png
 
-XC=`tail -n +2 $SEQ1 | wc -c | cut -d' ' -f 1`
-XL=`tail -n +2 $SEQ1 | wc -l | cut -d' ' -f 1`
+XC=`tail -n +2 $SEQ1 | wc -c | tr -d ' '`
+XL=`tail -n +2 $SEQ1 | wc -l | tr -d ' '`
 XLEN=`expr "$XC" - "$XL"`
-YC=`tail -n +2 $SEQ2 | wc -c | cut -d' ' -f 1`
-YL=`tail -n +2 $SEQ2 | wc -l | cut -d' ' -f 1`
+YC=`tail -n +2 $SEQ2 | wc -c | tr -d ' '`
+YL=`tail -n +2 $SEQ2 | wc -l | tr -d ' '`
 YLEN=`expr "$YC" - "$YL"`
 RATIO=`echo "scale=2; ${YLEN} / ${XLEN}" | bc`
 

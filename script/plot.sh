@@ -19,12 +19,9 @@ gnuplot -e "
  set tics scale 1.5,0.5;
  set x2tics offset 0,-0.5;
  set ytics offset 0.8,0;
- set tics font 'DejaVuLGCSans,7';
  set x2label '${SEQ1_NAME}';
- set x2label font 'DejaVuLGCSans,10';
  set x2label offset 0,-0.8;
  set ylabel '${SEQ2_NAME}';
- set ylabel font 'DejaVuLGCSans,10';
  set ylabel offset 3.3,0;
  set nokey;
  unset xtics;

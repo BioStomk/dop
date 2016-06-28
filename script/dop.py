@@ -37,7 +37,10 @@ if not os.path.exists(args.outdir):
 
 out_file = os.path.join(args.outdir, out_filename)
 
-cmd = 'comptool align %s %s -s -k %d' % (q_seq_file, t_seq_file, args.kmer_size)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.join(os.path.dirname(script_dir), 'src')
+
+cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, q_seq_file, t_seq_file, args.kmer_size)
 subprocess.check_call(cmd, shell=True)
 
 f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (q_seq_filename, t_seq_filename)
@@ -55,7 +58,7 @@ q_seq_len = get_seq_len(q_seq_file)
 t_seq_len = get_seq_len(t_seq_file)
 ratio = float(q_seq_len) / t_seq_len
 
-plot_cmd = ' '.join(map(str, ['./plot.sh', q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, ratio, f_match_file, out_file]))
+plot_cmd = ' '.join(map(str, [os.path.join(script_dir, 'plot.sh'), q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, ratio, f_match_file, out_file]))
 subprocess.check_call(plot_cmd, shell=True)
 
 os.remove(f_match_file)

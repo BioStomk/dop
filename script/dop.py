@@ -34,7 +34,7 @@ elif len(args.seqs) == 2:
     t_seq_filename = os.path.basename(t_seq_file)
     out_filename = q_seq_filename + '__' + t_seq_filename + '.' + str(args.kmer_size) + '.png'
 else:
-    sys.exit('Specify only one of two FASTA files')
+    sys.exit('Error: Specify one or two FASTA files')
 
 if not os.path.exists(args.outdir):
     os.mkdir(args.outdir)

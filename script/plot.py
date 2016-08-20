@@ -1,7 +1,7 @@
 import subprocess
 import math
 
-def plot(x_name, y_name, x_len, y_len, data, out_file, scale=False):
+def plot(x_name, y_name, x_len, y_len, kmer_size, data, out_file, scale=False):
     cmd = 'gnuplot -e "'
     cmd += 'set x2range [0 : %d];' % x_len
     cmd += 'set yrange  [%d : 0];' % y_len
@@ -17,6 +17,7 @@ def plot(x_name, y_name, x_len, y_len, data, out_file, scale=False):
     cmd += "set ylabel  '%s';" % y_name.replace('_', '\_')
     cmd += 'set x2label offset 0, -0.8;'
     cmd += 'set ylabel  offset 2.0, 0;'
+    cmd += "set label 'k-mer size = %d' at screen 0.01, 0.98 ;" % kmer_size
     cmd += 'unset key;'
     cmd += 'unset xtics;'
     if scale:

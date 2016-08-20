@@ -62,7 +62,7 @@ q_seq_len = get_seq_len(q_seq_file)
 t_seq_len = get_seq_len(t_seq_file)
 ratio = float(q_seq_len) / t_seq_len
 
-plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, f_match_file, out_file, args.scale)
+plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, out_file, args.scale)
 
 os.remove(f_match_file)
 os.remove(b_match_file)

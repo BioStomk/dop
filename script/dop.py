@@ -3,6 +3,7 @@
 import argparse
 import subprocess
 import os.path
+import plot
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -13,6 +14,9 @@ parser.add_argument('-d', '--outdir', default='.',
 
 parser.add_argument('-k', '--kmer_size', type=int, default=20,
                     help='k-mer size for matching')
+
+parser.add_argument('-s', '--scale', action='store_true',
+                    help='Scale output image size (to look into details of long sequence comparison)')
 
 parser.add_argument('seqs', nargs='+',
                     help='FASTA files of sequences to be compared. If only one file is specified, \
@@ -58,8 +62,7 @@ q_seq_len = get_seq_len(q_seq_file)
 t_seq_len = get_seq_len(t_seq_file)
 ratio = float(q_seq_len) / t_seq_len
 
-plot_cmd = ' '.join(map(str, [os.path.join(script_dir, 'plot.sh'), q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, ratio, f_match_file, out_file]))
-subprocess.check_call(plot_cmd, shell=True)
+plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, f_match_file, out_file, args.scale)
 
 os.remove(f_match_file)
 os.remove(b_match_file)

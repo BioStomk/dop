@@ -21,16 +21,15 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, data, out_file, scale=False):
     cmd += 'unset key;'
     cmd += 'unset xtics;'
     if scale:
+        x_size = x_len / 100
+        y_size = y_len / 100
+    else:
         if x_len > y_len:
             x_size = 50 * math.log(x_len, 2)
             y_size = x_size * y_len / x_len * 1.2
         else:
             y_size = 50 * math.log(y_len, 2)
             x_size = y_size * x_len / y_len * 1.2
-    else:
-        x_size = x_len / 100
-        y_size = y_len / 100
-    print x_size, y_size
     cmd += 'set terminal png size %d, %d;' % (x_size, y_size)
     cmd += "set output '%s';" % out_file
     cmd += "plot '%s' w p ps 0.15 lc rgb 'black'" % data

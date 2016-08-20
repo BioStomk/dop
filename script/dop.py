@@ -40,11 +40,11 @@ out_file = os.path.join(args.outdir, out_filename)
 script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(os.path.dirname(script_dir), 'src')
 
-cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, q_seq_file, t_seq_file, args.kmer_size)
+cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)
 subprocess.check_call(cmd, shell=True)
 
-f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (q_seq_filename, t_seq_filename)
-b_match_file = 'alignments-backward-startpos_%s_%s.tsv' % (q_seq_filename, t_seq_filename)
+f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (t_seq_filename, q_seq_filename)
+b_match_file = 'alignments-backward-startpos_%s_%s.tsv' % (t_seq_filename, q_seq_filename)
 if not os.path.exists(f_match_file) or not os.path.exists(b_match_file):
     sys.exit('Cannot find match files. Exit')
 cmd = 'tail -n +1 %s >> %s' % (b_match_file, f_match_file)

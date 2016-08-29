@@ -1,7 +1,8 @@
+import os
 import subprocess
 import math
 
-def plot(x_name, y_name, x_len, y_len, kmer_size, data, out_file, scale=False):
+def plot(x_name, y_name, x_len, y_len, kmer_size, f_file, b_file, out_file, scale=False, color=False):
     cmd = 'gnuplot -e "'
     cmd += 'set x2range [0 : %d];' % x_len
     cmd += 'set yrange  [%d : 0];' % y_len
@@ -32,6 +33,13 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, data, out_file, scale=False):
             x_size = y_size * x_len / y_len * 1.2
     cmd += 'set terminal png size %d, %d;' % (x_size, y_size)
     cmd += "set output '%s';" % out_file
-    cmd += "plot '%s' w p ps 0.15 lc rgb 'black'" % data
+    if color:
+        cmd += "plot '%s' w p ps 0.15 lc rgb 'red', '%s' w p ps 0.15 lc rgb 'dark-green';" % (f_file, b_file)
+    else:
+        if not os.path.exists(f_file) or not os.path.exists(b_file):
+            sys.exit('Cannot find match files. Exit')
+        cat_cmd = 'tail -n +1 %s >> %s' % (b_file, f_file)
+        subprocess.check_call(cat_cmd, shell=True)
+        cmd += "plot '%s' w p ps 0.15 lc rgb 'black';" % f_file
     cmd += '"'
     subprocess.check_call(cmd, shell=True)

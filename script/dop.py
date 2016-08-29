@@ -18,6 +18,9 @@ parser.add_argument('-k', '--kmer_size', type=int, default=20,
 parser.add_argument('-s', '--scale', action='store_true',
                     help='Scale output image size (to look into details of long sequence comparison)')
 
+parser.add_argument('-c', '--color', action='store_true',
+                    help='Draw dots with two colors to distinguish forward and reverse matches')
+
 parser.add_argument('seqs', nargs='+',
                     help='FASTA files of sequences to be compared. If only one file is specified, \
                           the sequence is compared to itself')
@@ -49,10 +52,6 @@ subprocess.check_call(cmd, shell=True)
 
 f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (t_seq_filename, q_seq_filename)
 b_match_file = 'alignments-backward-startpos_%s_%s.tsv' % (t_seq_filename, q_seq_filename)
-if not os.path.exists(f_match_file) or not os.path.exists(b_match_file):
-    sys.exit('Cannot find match files. Exit')
-cmd = 'tail -n +1 %s >> %s' % (b_match_file, f_match_file)
-subprocess.check_call(cmd, shell=True)
 
 def get_seq_len(seq_file):
     with open(seq_file, 'r') as f:
@@ -62,7 +61,7 @@ q_seq_len = get_seq_len(q_seq_file)
 t_seq_len = get_seq_len(t_seq_file)
 ratio = float(q_seq_len) / t_seq_len
 
-plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, out_file, args.scale)
+plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, b_match_file, out_file, args.scale, args.color)
 
 os.remove(f_match_file)
 os.remove(b_match_file)

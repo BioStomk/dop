@@ -9,6 +9,10 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     description= "Draw dot plot by calculating k-mer match between two DNA sequences")
 
+parser.add_argument('seq_files', nargs='+',
+                    help='FASTA files of sequences to be compared. If only one file is specified, \
+                          the sequence is compared to itself')
+
 parser.add_argument('-d', '--outdir', default='.',
                     help='output directory')
 
@@ -21,9 +25,6 @@ parser.add_argument('-s', '--scale', action='store_true',
 parser.add_argument('-c', '--color', action='store_true',
                     help='Draw dots with two colors to distinguish forward and reverse matches')
 
-parser.add_argument('seq_files', nargs='+',
-                    help='FASTA files of sequences to be compared. If only one file is specified, \
-                          the sequence is compared to itself')
 
 args = parser.parse_args()
 

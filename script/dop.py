@@ -21,18 +21,18 @@ parser.add_argument('-s', '--scale', action='store_true',
 parser.add_argument('-c', '--color', action='store_true',
                     help='Draw dots with two colors to distinguish forward and reverse matches')
 
-parser.add_argument('seqs', nargs='+',
+parser.add_argument('seq_files', nargs='+',
                     help='FASTA files of sequences to be compared. If only one file is specified, \
                           the sequence is compared to itself')
 
 args = parser.parse_args()
 
-if len(args.seqs) == 1:
-    q_seq_file = t_seq_file = args.seqs[0]
+if len(args.seq_files) == 1:
+    q_seq_file = t_seq_file = args.seq_files[0]
     q_seq_filename = t_seq_filename = os.path.basename(q_seq_file)
     out_filename = q_seq_filename + '.' + str(args.kmer_size) + '.png'
-elif len(args.seqs) == 2:
-    q_seq_file, t_seq_file = args.seqs
+elif len(args.seq_files) == 2:
+    q_seq_file, t_seq_file = args.seq_files
     q_seq_filename = os.path.basename(q_seq_file)
     t_seq_filename = os.path.basename(t_seq_file)
     out_filename = q_seq_filename + '__' + t_seq_filename + '.' + str(args.kmer_size) + '.png'

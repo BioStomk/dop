@@ -25,6 +25,12 @@ parser.add_argument('-s', '--scale', action='store_true',
 parser.add_argument('-c', '--color', action='store_true',
                     help='Draw dots with two colors to distinguish forward and reverse matches')
 
+parser.add_argument('-m', '--store_matches', action='store_true',
+                    help='Store match files')
+
+parser.add_argument('-f', '--force', dest='recalculate_match', action='store_true',
+                    help='Force to calculate matches even if the match files exist')
+
 
 args = parser.parse_args()
 
@@ -48,11 +54,12 @@ out_file = os.path.join(args.outdir, out_filename)
 script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(os.path.dirname(script_dir), 'src')
 
-cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)
-subprocess.check_call(cmd, shell=True)
-
 f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (t_seq_filename, q_seq_filename)
 b_match_file = 'alignments-backward-startpos_%s_%s.tsv' % (t_seq_filename, q_seq_filename)
+
+if not (os.path.exists(f_match_file) and os.path.exists(b_match_file)) or args.recalculate_match:
+    cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)
+    subprocess.check_call(cmd, shell=True)
 
 def get_seq_len(seq_file):
     with open(seq_file, 'r') as f:
@@ -64,5 +71,6 @@ ratio = float(q_seq_len) / t_seq_len
 
 plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, b_match_file, out_file, args.scale, args.color)
 
-os.remove(f_match_file)
-os.remove(b_match_file)
+if not args.store_matches:
+    os.remove(f_match_file)
+    os.remove(b_match_file)

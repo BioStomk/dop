@@ -25,6 +25,15 @@ parser.add_argument('-s', '--scale', action='store_true',
 parser.add_argument('-c', '--color', action='store_true',
                     help='Draw dots with two colors to distinguish forward and reverse matches')
 
+parser.add_argument('--no_labels', action='store_true',
+                    help='Do not draw labels')
+
+parser.add_argument('--no_tics', action='store_true',
+                    help='Do not draw tics')
+
+parser.add_argument('-p', '--plain', action='store_true',
+                    help='Alias for --no_labels --no_tics')
+
 parser.add_argument('-m', '--store_matches', action='store_true',
                     help='Store match files')
 
@@ -45,6 +54,10 @@ elif len(args.seq_files) == 2:
     out_filename = q_seq_filename + '__' + t_seq_filename + '.' + str(args.kmer_size) + '.png'
 else:
     sys.exit('Error: Specify one or two FASTA files')
+
+if args.plain:
+    args.no_labels = True
+    args.no_tics   = True
 
 if not os.path.exists(args.outdir):
     os.mkdir(args.outdir)
@@ -69,7 +82,7 @@ q_seq_len = get_seq_len(q_seq_file)
 t_seq_len = get_seq_len(t_seq_file)
 ratio = float(q_seq_len) / t_seq_len
 
-plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, b_match_file, out_file, args.scale, args.color)
+plot.plot(q_seq_filename, t_seq_filename, q_seq_len, t_seq_len, args.kmer_size, f_match_file, b_match_file, out_file, not args.no_tics, not args.no_labels, args.scale, args.color)
 
 if not args.store_matches:
     os.remove(f_match_file)

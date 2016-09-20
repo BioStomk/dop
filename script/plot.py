@@ -21,16 +21,19 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, f_file, b_file, out_file, scal
     cmd += "set label 'k-mer size = %d' at screen 0.01, 0.98 ;" % kmer_size
     cmd += 'unset key;'
     cmd += 'unset xtics;'
-    if scale:
-        x_size = x_len / 100
-        y_size = y_len / 100
+
+    if linear_scale:
+        x_size = x_len / 30
+        y_size = y_len / 30
     else:
         if x_len > y_len:
-            x_size = 50 * math.log(x_len, 2)
-            y_size = x_size * y_len / x_len * 1.2
+            x_size = 100 * math.log(x_len, 2)
+            y_size = x_size * y_len / x_len
         else:
-            y_size = 50 * math.log(y_len, 2)
-            x_size = y_size * x_len / y_len * 1.2
+            y_size = 100 * math.log(y_len, 2)
+            x_size = y_size * x_len / y_len
+
+    cmd += 'set size ratio %f;' % (float(x_len) / y_len)
     cmd += 'set terminal png size %d, %d;' % (x_size, y_size)
     cmd += "set output '%s';" % out_file
     if color:

@@ -10,10 +10,10 @@
 class CompTool{
     private:
     const int num_char_;
-    int8_t* seq1_;
     int seq1_size_;
-    int8_t* seq2_;
     int seq2_size_;
+    int8_t* seq1_;
+    int8_t* seq2_;
 
     int* create_SA(const char* file);
     void search_alignment(int argc, char** argv, int* SA);

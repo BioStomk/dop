@@ -227,53 +227,50 @@ void CompTool::run_chaining(string file, ofstream& ofs, const int near_dist){
 }
 
 
-// fastaファイルを読み込んで必要なメモリを確保し、'ACGTN'を'12340'に変換して格納する (int版)
-int* CompTool::read_fasta_and_create_int_array(const char* file, int& size){
+int get_seq_length(const string file){
     ifstream ifs;
     ifs.open(file);
-    if(!ifs.is_open()) {cout << "File not found\n>" << file << endl; exit(1);}
+    if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
-    getline(ifs, header);   // ヘッダーを読み込む
-    size = 0;
+    getline(ifs, header);   // Skip header
+    int size = 0;
     char buf;
-    while(ifs >> buf) size++; // 文字数をカウント
+    while(ifs >> buf) size++;
     ifs.close();
+    return size;
+}
 
-    // 再びファイルを開いて1文字ずつ読み込み、数字にエンコードして配列に格納
+
+int* CompTool::read_fasta_and_create_int_array(const string file, int& size){
+    size = get_seq_length(file);
+    ifstream ifs;
     ifs.open(file);
+    string header;
     getline(ifs, header);
     int* s = new int[++size];
     int* p = s;
+    char buf;
     while(ifs >> buf) *p++ = encode_char(buf);
-    *p++ = 0;   // 末尾に'0'を入れる
+    *p++ = 0;   // Append '0'
     return s;
 }
 
 
-// fastaファイルを読み込んで必要なメモリを確保し、'ACGTN'を'12340'に変換して格納する (int8_t版)
-int8_t* CompTool::read_fasta_and_create_int8_t_array(const string& file, int& size){
+int8_t* CompTool::read_fasta_and_create_int8_t_array(const string file, int& size){
+    size = get_seq_length(file);
     ifstream ifs;
     ifs.open(file);
-    if(!ifs.is_open()) {cout << "File not found\n>" << file << endl; exit(1);}
     string header;
-    getline(ifs, header);   // ヘッダーを読み込む
-    size = 0;
-    char buf;
-    while(ifs >> buf) size++; // 文字数をカウント
-    ifs.close();
-
-    // 再びファイルを開いて1文字ずつ読み込み、数字にエンコードして配列に格納
-    ifs.open(file);
     getline(ifs, header);
     int8_t* s = new int8_t[++size];
     int8_t* p = s;
+    char buf;
     while(ifs >> buf) *p++ = (int8_t)encode_char(buf);
-    *p++ = 0;   // 末尾に'0'を入れる
+    *p++ = 0;   // Append '0'
     return s;
 }
 
 
-// intの配列の中身をint8_tの配列にコピーする
 void CompTool::copy_int_array_to_int8_t_array(int* int_array, int8_t* int8_array, const int size){
     for(int i = 0 ; i < size; i++)
         int8_array[i] = int_array[i];

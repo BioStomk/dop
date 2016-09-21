@@ -15,22 +15,6 @@ class CompTool{
     int8_t* seq2_;
     int seq2_size_;
 
-    int encode_char(const char c){
-        switch(c){
-        case '$': return 0;
-        case 'A': case 'a': return 1;
-        case 'C': case 'c': return 2;
-        case 'G': case 'g': return 3;
-        case 'T': case 't': return 4;
-        case 'N': case 'n': return 1;  // Treat 'N' as 'A'
-        default: return 1;             // Treat unknown character as 'A'
-        }
-    }
-
-    int* read_fasta_and_create_int_array(const string file, int& size);
-    int8_t* read_fasta_and_create_int8_t_array(const string file, int& size);
-    void copy_int_array_to_int8_t_array(int* int_array, int8_t* int8_array, const int size);
-
     int* create_SA(const char* file);
     void search_alignment(int argc, char** argv, int* SA);
 

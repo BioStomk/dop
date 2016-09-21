@@ -12,6 +12,71 @@ string basename(const string& path){
 }
 
 
+int get_seq_length(const string file){
+    ifstream ifs;
+    ifs.open(file);
+    if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
+    string header;
+    getline(ifs, header);   // Skip header
+    int size = 0;
+    char buf;
+    while(ifs >> buf) size++;
+    ifs.close();
+    return size;
+}
+
+
+int encode_char(const char c){
+    switch(c){
+    case '$': return 0;
+    case 'A': case 'a': return 1;
+    case 'C': case 'c': return 2;
+    case 'G': case 'g': return 3;
+    case 'T': case 't': return 4;
+    case 'N': case 'n': return 1;  // Treat 'N' as 'A'
+    default: return 1;             // Treat unknown character as 'A'
+    }
+}
+
+
+int* read_fasta_and_create_int_array(const string file, int& size){
+    size = get_seq_length(file);
+    ifstream ifs;
+    ifs.open(file);
+    string header;
+    getline(ifs, header);
+    int* s = new int[++size];
+    int* p = s;
+    char buf;
+    while(ifs >> buf) *p++ = encode_char(buf);
+    *p++ = 0;   // Append '0'
+    return s;
+}
+
+
+int8_t* read_fasta_and_create_int8_t_array(const string file, int& size){
+    size = get_seq_length(file);
+    ifstream ifs;
+    ifs.open(file);
+    string header;
+    getline(ifs, header);
+    int8_t* s = new int8_t[++size];
+    int8_t* p = s;
+    char buf;
+    while(ifs >> buf) *p++ = (int8_t)encode_char(buf);
+    *p++ = 0;   // Append '0'
+    return s;
+}
+
+
+int8_t* convert_int_array_to_int8_t_array(int* int_array, const int size){
+    int8_t* int8_t_array = new int8_t[size];
+    for(int i = 0 ; i < size; i++)
+        int8_t_array[i] = int_array[i];
+    return int8_t_array;
+}
+
+
 void CompTool::run_command(int argc, char** argv){
     argc--; argv++;
     const string command = argv[0];
@@ -42,8 +107,7 @@ int* CompTool::create_SA(const char* file){
     IS is(seq1_int, SA, seq1_size_, num_char_);
     is.run();
 
-    seq1_ = new int8_t[seq1_size_];
-    copy_int_array_to_int8_t_array(seq1_int, seq1_, seq1_size_);
+    seq1_ = convert_int_array_to_int8_t_array(seq1_int, seq1_size_);
     delete seq1_int;
     return SA;
 }
@@ -224,54 +288,4 @@ void CompTool::run_chaining(string file, ofstream& ofs, const int near_dist){
     Chaining chaining(alignments, num_alignment, near_dist);
     chaining.run();
     chaining.output_major_chains(ofs);
-}
-
-
-int get_seq_length(const string file){
-    ifstream ifs;
-    ifs.open(file);
-    if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
-    string header;
-    getline(ifs, header);   // Skip header
-    int size = 0;
-    char buf;
-    while(ifs >> buf) size++;
-    ifs.close();
-    return size;
-}
-
-
-int* CompTool::read_fasta_and_create_int_array(const string file, int& size){
-    size = get_seq_length(file);
-    ifstream ifs;
-    ifs.open(file);
-    string header;
-    getline(ifs, header);
-    int* s = new int[++size];
-    int* p = s;
-    char buf;
-    while(ifs >> buf) *p++ = encode_char(buf);
-    *p++ = 0;   // Append '0'
-    return s;
-}
-
-
-int8_t* CompTool::read_fasta_and_create_int8_t_array(const string file, int& size){
-    size = get_seq_length(file);
-    ifstream ifs;
-    ifs.open(file);
-    string header;
-    getline(ifs, header);
-    int8_t* s = new int8_t[++size];
-    int8_t* p = s;
-    char buf;
-    while(ifs >> buf) *p++ = (int8_t)encode_char(buf);
-    *p++ = 0;   // Append '0'
-    return s;
-}
-
-
-void CompTool::copy_int_array_to_int8_t_array(int* int_array, int8_t* int8_array, const int size){
-    for(int i = 0 ; i < size; i++)
-        int8_array[i] = int_array[i];
 }

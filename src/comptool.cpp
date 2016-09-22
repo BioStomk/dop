@@ -27,7 +27,7 @@ int encode_char(const char c){
 
 int get_seq_length(const string file){
     ifstream ifs;
-    ifs.open(file);
+    ifs.open(file.c_str());
     if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
     getline(ifs, header);   // Skip header
@@ -41,7 +41,7 @@ int get_seq_length(const string file){
 
 int* read_fasta_and_create_int_array(const string file, const int size){
     ifstream ifs;
-    ifs.open(file);
+    ifs.open(file.c_str());
     if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
     getline(ifs, header);
@@ -56,7 +56,7 @@ int* read_fasta_and_create_int_array(const string file, const int size){
 
 int8_t* read_fasta_and_create_int8_t_array(const string file, const int size){
     ifstream ifs;
-    ifs.open(file);
+    ifs.open(file.c_str());
     if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
     getline(ifs, header);

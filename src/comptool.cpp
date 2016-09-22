@@ -80,35 +80,26 @@ int8_t* convert_int_array_to_int8_t_array(int* int_array, const int size){
 void CompTool::run_command(int argc, char** argv){
     argc--; argv++;
     const string command = argv[0];
-    if(command == "align") {
-        int* SA = create_SA(argv[1]);
-        search_alignment(argc, argv, SA);
-        delete SA;
-    }
-    else if(command == "chain") {
+    if(command == "align")
+        search_alignment(argc, argv);
+    else if(command == "chain")
         chain_alignment(argc, argv);
-    }
-    else {
+    else
         cout << "Unknown command: \"" << command << "\"" << endl;
-    }
 }
 
 
-int* CompTool::create_SA(const char* file){
-    // Perform induced sorting with int array
-    seq1_size_ = get_seq_length(file) + 1;
-    int* seq1_int = read_fasta_and_create_int_array(file, seq1_size_);
-    int* SA = new int[seq1_size_];
-    IS is(seq1_int, SA, seq1_size_, num_char_);
+int* CompTool::create_SA(const string file, const int size){
+    int* seq = read_fasta_and_create_int_array(file, size);
+    int* SA = new int[size];
+    IS is(seq, SA, size, num_char_);
     is.run();
-
-    seq1_ = convert_int_array_to_int8_t_array(seq1_int, seq1_size_);
-    delete seq1_int;
+    delete seq;
     return SA;
 }
 
 
-void CompTool::search_alignment(int argc, char** argv, int* SA){
+void CompTool::search_alignment(int argc, char** argv){
     if(argc < 3) {cout << "File not enough" << endl; exit(1);}
 
     const string seq1_file = argv[1];
@@ -137,12 +128,15 @@ void CompTool::search_alignment(int argc, char** argv, int* SA){
         }
     }
 
-    // Create BWT from seq1
-    BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
-
-    // Load seq2
+    // Load sequences from Fastsa files
+    seq1_size_ = get_seq_length(seq1_file) + 1;
     seq2_size_ = get_seq_length(seq2_file) + 1;
+    seq1_ = read_fasta_and_create_int8_t_array(seq1_file, seq1_size_);
     seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
+
+    // Create BWT from seq1
+    int* SA = create_SA(seq1_file, seq1_size_);
+    BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
 
     // Search forward matches
     if(search_forward){
@@ -200,6 +194,7 @@ void CompTool::search_alignment(int argc, char** argv, int* SA){
         }
         delete[] query;
     }
+    delete SA;
 }
 
 

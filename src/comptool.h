@@ -15,8 +15,8 @@ class CompTool{
     int8_t* seq1_;
     int8_t* seq2_;
 
-    int* create_SA(const char* file);
-    void search_alignment(int argc, char** argv, int* SA);
+    int* create_SA(const string file, const int size);
+    void search_alignment(int argc, char** argv);
 
     void output_startpos(ofstream& ofs, const int sx, const int sy){
         ofs << sx << "\t" << sy << endl;

@@ -90,23 +90,21 @@ void CompTool::search(int argc, char** argv){
     const string seq2_name = basename(seq2_file);
 
     // Options
-    int  kmer_size         = 15;
-    int  slide_letters     = 1;
-    int  bwt_interval      = 1;
-    int  max_num_matches   = 1000000000;
-    bool search_forward    = true;
-    bool search_reverse    = true;
-    bool outputs_start_pos = false;
+    int  kmer_size       = 15;
+    int  slide_letters   = 1;
+    int  bwt_interval    = 1;
+    int  max_num_matches = 1000000000;
+    bool search_forward  = true;
+    bool search_reverse  = true;
 
     if(argc > 3){
         for(int i = 3; i < argc; i++){
-            if     (argv[i][1] == 'k') kmer_size         = atoi(argv[++i]);
-            else if(argv[i][1] == 'l') slide_letters     = atoi(argv[++i]);
-            else if(argv[i][1] == 'i') bwt_interval      = atoi(argv[++i]);
-            else if(argv[i][1] == 'm') max_num_matches   = atoi(argv[++i]);
-            else if(argv[i][1] == 'f') search_reverse    = false;
-            else if(argv[i][1] == 'r') search_forward    = false;
-            else if(argv[i][1] == 's') outputs_start_pos = true;
+            if     (argv[i][1] == 'k') kmer_size       = atoi(argv[++i]);
+            else if(argv[i][1] == 'l') slide_letters   = atoi(argv[++i]);
+            else if(argv[i][1] == 'i') bwt_interval    = atoi(argv[++i]);
+            else if(argv[i][1] == 'm') max_num_matches = atoi(argv[++i]);
+            else if(argv[i][1] == 'f') search_reverse  = false;
+            else if(argv[i][1] == 'r') search_forward  = false;
         }
     }
 
@@ -118,8 +116,8 @@ void CompTool::search(int argc, char** argv){
     int* SA = create_SA(seq1_file, seq1_size_);
     BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
 
-    if(search_forward) search_forward_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
-    if(search_reverse) search_reverse_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
+    if(search_forward) search_forward_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches);
+    if(search_reverse) search_reverse_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches);
 
     delete SA;
 }
@@ -135,16 +133,13 @@ int* CompTool::create_SA(const string file, const int size){
 }
 
 
-void CompTool::search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
-                                      const int slide_letters, const int max_num_matches, const bool outputs_start_pos){
-    stringstream out_file;
-    if(outputs_start_pos)
-        out_file << "alignments-forward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
-    else
-        out_file << "alignments-forward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
-    ofstream ofs(out_file.str().c_str());
+void CompTool::search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
+                                      const int kmer_size, const int slide_letters, const int max_num_matches){
+    string out_file = seq1_name + "__" + seq2_name + ".match.forward";
+    ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
+
     for(int i = 0; i < seq2_size_ - kmer_size; i += slide_letters){
         int8_t* query = &seq2_[i];
         int lb, ub;  // lower- and upper-bound of matches in suffix array
@@ -152,26 +147,20 @@ void CompTool::search_forward_matches(const string seq1_name, const string seq2_
         if(lb <= ub){
             for(int j = lb; j <= ub; j++){
                 if(j == lb + max_num_matches) break;
-                if(outputs_start_pos)
-                    output_startpos(ofs, i, SA[j]);
-                else
-                    output_alignment_forward(ofs, i, SA[j], kmer_size);
+                ofs << i << "\t" << SA[j] << endl;
             }
         }
     }
 }
 
 
-void CompTool::search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
-                                      const int slide_letters, const int max_num_matches, const bool outputs_start_pos){
-    stringstream out_file;
-    if(outputs_start_pos)
-        out_file << "alignments-backward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
-    else
-        out_file << "alignments-backward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
-    ofstream ofs(out_file.str().c_str());
+void CompTool::search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
+                                      const int kmer_size, const int slide_letters, const int max_num_matches){
+    string out_file = seq1_name + "__" + seq2_name + ".match.reverse";
+    ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
+
     int8_t* query = new int8_t[kmer_size];
     for(int i = kmer_size-1; i < seq2_size_ - 1; i += slide_letters){
         // convert k-mers to reverse complements
@@ -182,10 +171,7 @@ void CompTool::search_reverse_matches(const string seq1_name, const string seq2_
         if(lb <= ub){
             for(int j = lb; j <= ub; j++){
                 if(j == lb + max_num_matches) break;
-                if(outputs_start_pos)
-                    output_startpos(ofs, i, SA[j]);
-                else
-                    output_alignment_backward(ofs, i, SA[j], kmer_size);
+                ofs << i << "\t" << SA[j] << endl;
             }
         }
     }
@@ -214,28 +200,26 @@ void CompTool::chain(int argc, char** argv){
     const string seq2_name = basename(seq2_file);
 
     stringstream out_file;
-    out_file << "chains_" << seq1_name << "_" << seq2_name << ".tsv";
+    out_file << seq1_name << "__" << seq2_name << ".chain";
     ofstream ofs(out_file.str().c_str());
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;
 
     if(runs_forward){
-        stringstream ifs1_name;
-        ifs1_name << "alignments-forward-for-chaining_" << seq1_name << "_" << seq2_name
-                  << ".tsv";
-        run_chaining(ifs1_name.str(), ofs, near_dist);
+        stringstream ifs_name;
+        ifs_name << seq1_name << "__" << seq2_name << ".match.forward";
+        run_chaining(ifs_name.str(), ofs, near_dist, true);
     }
 
     if(runs_backward){
-        stringstream ifs2_name;
-        ifs2_name << "alignments-backward-for-chaining_" << seq1_name << "_" << seq2_name
-                  << ".tsv";
-        run_chaining(ifs2_name.str(), ofs, near_dist);
+        stringstream ifs_name;
+        ifs_name << seq1_name << "__" << seq2_name << ".match.reverse";
+        run_chaining(ifs_name.str(), ofs, near_dist, false);
     }
 }
 
 
 // Receive an alignment file, run chaining and output a chain file
-void CompTool::run_chaining(string file, ofstream& ofs, const int near_dist){
+void CompTool::run_chaining(const string file, ofstream& ofs, const int near_dist, const bool forward){
     // Count alignments
     ifstream ifs;
     ifs.open(file.c_str());
@@ -250,6 +234,8 @@ void CompTool::run_chaining(string file, ofstream& ofs, const int near_dist){
     ifs.open(file.c_str());
     getline(ifs, line);  // Skip header
     Alignment* alignments = new Alignment[num_alignment];
+
+    // TODO: Parse kmer-size from header and calculate end positions of matches
     int* buf = new int[5];
     for(int i = 0; i < num_alignment; i++){
         for(int j = 0; j < 5; j++){

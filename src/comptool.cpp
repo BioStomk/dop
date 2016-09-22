@@ -69,14 +69,6 @@ int8_t* read_fasta_and_create_int8_t_array(const string file, const int size){
 }
 
 
-int8_t* convert_int_array_to_int8_t_array(int* int_array, const int size){
-    int8_t* int8_t_array = new int8_t[size];
-    for(int i = 0 ; i < size; i++)
-        int8_t_array[i] = int_array[i];
-    return int8_t_array;
-}
-
-
 void CompTool::run_command(int argc, char** argv){
     argc--; argv++;
     const string command = argv[0];

@@ -81,6 +81,50 @@ void CompTool::run_command(int argc, char** argv){
 }
 
 
+void CompTool::search_alignment(int argc, char** argv){
+    if(argc < 3) {cout << "File not enough" << endl; exit(1);}
+
+    const string seq1_file = argv[1];
+    const string seq2_file = argv[2];
+    const string seq1_name = basename(seq1_file);
+    const string seq2_name = basename(seq2_file);
+
+    // Options
+    int  kmer_size         = 15;
+    int  slide_letters     = 1;
+    int  bwt_interval      = 1;
+    int  max_num_matches   = 1000000000;
+    bool search_forward    = true;
+    bool search_reverse    = true;
+    bool outputs_start_pos = false;
+
+    if(argc > 3){
+        for(int i = 3; i < argc; i++){
+            if     (argv[i][1] == 'k') kmer_size         = atoi(argv[++i]);
+            else if(argv[i][1] == 'l') slide_letters     = atoi(argv[++i]);
+            else if(argv[i][1] == 'i') bwt_interval      = atoi(argv[++i]);
+            else if(argv[i][1] == 'm') max_num_matches   = atoi(argv[++i]);
+            else if(argv[i][1] == 'f') search_reverse    = false;
+            else if(argv[i][1] == 'r') search_forward    = false;
+            else if(argv[i][1] == 's') outputs_start_pos = true;
+        }
+    }
+
+    seq1_size_ = get_seq_length(seq1_file) + 1;
+    seq2_size_ = get_seq_length(seq2_file) + 1;
+    seq1_ = read_fasta_and_create_int8_t_array(seq1_file, seq1_size_);
+    seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
+
+    int* SA = create_SA(seq1_file, seq1_size_);
+    BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
+
+    if(search_forward) search_forward_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
+    if(search_reverse) search_reverse_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
+
+    delete SA;
+}
+
+
 int* CompTool::create_SA(const string file, const int size){
     int* seq = read_fasta_and_create_int_array(file, size);
     int* SA = new int[size];
@@ -146,50 +190,6 @@ void CompTool::search_reverse_matches(const string seq1_name, const string seq2_
         }
     }
     delete[] query;
-}
-
-
-void CompTool::search_alignment(int argc, char** argv){
-    if(argc < 3) {cout << "File not enough" << endl; exit(1);}
-
-    const string seq1_file = argv[1];
-    const string seq2_file = argv[2];
-    const string seq1_name = basename(seq1_file);
-    const string seq2_name = basename(seq2_file);
-
-    // Options
-    int  kmer_size         = 15;
-    int  slide_letters     = 1;
-    int  bwt_interval      = 1;
-    int  max_num_matches   = 1000000000;
-    bool search_forward    = true;
-    bool search_reverse    = true;
-    bool outputs_start_pos = false;
-
-    if(argc > 3){
-        for(int i = 3; i < argc; i++){
-            if     (argv[i][1] == 'k') kmer_size         = atoi(argv[++i]);
-            else if(argv[i][1] == 'l') slide_letters     = atoi(argv[++i]);
-            else if(argv[i][1] == 'i') bwt_interval      = atoi(argv[++i]);
-            else if(argv[i][1] == 'm') max_num_matches   = atoi(argv[++i]);
-            else if(argv[i][1] == 'f') search_reverse    = false;
-            else if(argv[i][1] == 'r') search_forward    = false;
-            else if(argv[i][1] == 's') outputs_start_pos = true;
-        }
-    }
-
-    seq1_size_ = get_seq_length(seq1_file) + 1;
-    seq2_size_ = get_seq_length(seq2_file) + 1;
-    seq1_ = read_fasta_and_create_int8_t_array(seq1_file, seq1_size_);
-    seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
-
-    int* SA = create_SA(seq1_file, seq1_size_);
-    BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
-
-    if(search_forward) search_forward_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
-    if(search_reverse) search_reverse_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
-
-    delete SA;
 }
 
 

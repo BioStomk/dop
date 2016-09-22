@@ -15,12 +15,12 @@ class CompTool{
     int8_t* seq1_;
     int8_t* seq2_;
 
+    void search_alignment(int argc, char** argv);
     int* create_SA(const string file, const int size);
     void search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
                                 const int slide_letters, const int max_num_matches, const bool outputs_start_pos);
     void search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
                                 const int slide_letters, const int max_num_matches, const bool outputs_start_pos);
-    void search_alignment(int argc, char** argv);
 
     void output_startpos(ofstream& ofs, const int sx, const int sy){
         ofs << sx << "\t" << sy << endl;

@@ -12,6 +12,19 @@ string basename(const string& path){
 }
 
 
+int encode_char(const char c){
+    switch(c){
+    case '$': return 0;
+    case 'A': case 'a': return 1;
+    case 'C': case 'c': return 2;
+    case 'G': case 'g': return 3;
+    case 'T': case 't': return 4;
+    case 'N': case 'n': return 1;  // Treat 'N' as 'A'
+    default: return 1;             // Treat unknown character as 'A'
+    }
+}
+
+
 int get_seq_length(const string file){
     ifstream ifs;
     ifs.open(file);
@@ -26,26 +39,13 @@ int get_seq_length(const string file){
 }
 
 
-int encode_char(const char c){
-    switch(c){
-    case '$': return 0;
-    case 'A': case 'a': return 1;
-    case 'C': case 'c': return 2;
-    case 'G': case 'g': return 3;
-    case 'T': case 't': return 4;
-    case 'N': case 'n': return 1;  // Treat 'N' as 'A'
-    default: return 1;             // Treat unknown character as 'A'
-    }
-}
-
-
-int* read_fasta_and_create_int_array(const string file, int& size){
-    size = get_seq_length(file);
+int* read_fasta_and_create_int_array(const string file, const int size){
     ifstream ifs;
     ifs.open(file);
+    if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
     getline(ifs, header);
-    int* s = new int[++size];
+    int* s = new int[size];
     int* p = s;
     char buf;
     while(ifs >> buf) *p++ = encode_char(buf);
@@ -54,13 +54,13 @@ int* read_fasta_and_create_int_array(const string file, int& size){
 }
 
 
-int8_t* read_fasta_and_create_int8_t_array(const string file, int& size){
-    size = get_seq_length(file);
+int8_t* read_fasta_and_create_int8_t_array(const string file, const int size){
     ifstream ifs;
     ifs.open(file);
+    if(!ifs.is_open()) {cout << "Cannot find file:  " << file << endl; exit(1);}
     string header;
     getline(ifs, header);
-    int8_t* s = new int8_t[++size];
+    int8_t* s = new int8_t[size];
     int8_t* p = s;
     char buf;
     while(ifs >> buf) *p++ = (int8_t)encode_char(buf);
@@ -102,6 +102,7 @@ void CompTool::run_command(int argc, char** argv){
 
 int* CompTool::create_SA(const char* file){
     // Perform induced sorting with int array
+    seq1_size_ = get_seq_length(file) + 1;
     int* seq1_int = read_fasta_and_create_int_array(file, seq1_size_);
     int* SA = new int[seq1_size_];
     IS is(seq1_int, SA, seq1_size_, num_char_);
@@ -151,6 +152,7 @@ void CompTool::search_alignment(int argc, char** argv, int* SA){
     // Create BWT from seq1
     BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
 
+    seq2_size_ = get_seq_length(seq2_file) + 1;
     seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
 
     // Search forward matches

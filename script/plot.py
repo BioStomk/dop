@@ -46,7 +46,7 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, f_file, b_file, out_file, draw
     else:
         if not os.path.exists(f_file) or not os.path.exists(b_file):
             sys.exit('Cannot find match files. Exit')
-        cat_cmd = 'tail -n +1 %s >> %s' % (b_file, f_file)
+        cat_cmd = 'tail -n +2 %s >> %s' % (b_file, f_file)
         subprocess.check_call(cat_cmd, shell=True)
         cmd += "plot '%s' w p ps 0.15 lc rgb 'black';" % f_file
 

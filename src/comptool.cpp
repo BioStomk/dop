@@ -88,14 +88,8 @@ void CompTool::run_command(int argc, char** argv){
     else if(command == "chain") {
         chain_alignment(argc, argv);
     }
-    else if(command == "all") {
-        int* SA = create_SA(argv[1]);
-        search_alignment(argc, argv, SA);
-        delete SA;
-        chain_alignment(argc, argv);
-    }
     else {
-        cout << " Invalid command > \"" << command << "\"" << endl;
+        cout << "Unknown command: \"" << command << "\"" << endl;
     }
 }
 

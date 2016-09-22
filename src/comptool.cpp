@@ -99,6 +99,64 @@ int* CompTool::create_SA(const string file, const int size){
 }
 
 
+void CompTool::search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
+                                      const int slide_letters, const int max_num_matches, const bool outputs_start_pos){
+    stringstream out_file;
+    if(outputs_start_pos)
+        out_file << "alignments-forward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
+    else
+        out_file << "alignments-forward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
+    ofstream ofs(out_file.str().c_str());
+
+    ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
+    for(int i = 0; i < seq2_size_ - kmer_size; i += slide_letters){
+        int8_t* query = &seq2_[i];
+        int lb, ub;  // lower- and upper-bound of matches in suffix array
+        bwt.search(query, kmer_size, lb, ub);
+        if(lb <= ub){
+            for(int j = lb; j <= ub; j++){
+                if(j == lb + max_num_matches) break;
+                if(outputs_start_pos)
+                    output_startpos(ofs, i, SA[j]);
+                else
+                    output_alignment_forward(ofs, i, SA[j], kmer_size);
+            }
+        }
+    }
+}
+
+
+void CompTool::search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt, const int kmer_size,
+                                      const int slide_letters, const int max_num_matches, const bool outputs_start_pos){
+    stringstream out_file;
+    if(outputs_start_pos)
+        out_file << "alignments-backward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
+    else
+        out_file << "alignments-backward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
+    ofstream ofs(out_file.str().c_str());
+
+    ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
+    int8_t* query = new int8_t[kmer_size];
+    for(int i = kmer_size-1; i < seq2_size_ - 1; i += slide_letters){
+        // convert k-mers to reverse complements
+        for(int j = 0; j < kmer_size; j++)
+            query[j] = num_char_ - seq2_[i-j];
+        int lb, ub;  // lower- and upper-bound of matches in suffix array
+        bwt.search(query, kmer_size, lb, ub);
+        if(lb <= ub){
+            for(int j = lb; j <= ub; j++){
+                if(j == lb + max_num_matches) break;
+                if(outputs_start_pos)
+                    output_startpos(ofs, i, SA[j]);
+                else
+                    output_alignment_backward(ofs, i, SA[j], kmer_size);
+            }
+        }
+    }
+    delete[] query;
+}
+
+
 void CompTool::search_alignment(int argc, char** argv){
     if(argc < 3) {cout << "File not enough" << endl; exit(1);}
 
@@ -108,92 +166,37 @@ void CompTool::search_alignment(int argc, char** argv){
     const string seq2_name = basename(seq2_file);
 
     // Options
-    int  k                 = 15;
+    int  kmer_size         = 15;
     int  slide_letters     = 1;
     int  bwt_interval      = 1;
     int  max_num_matches   = 1000000000;
     bool search_forward    = true;
-    bool search_backward   = true;
+    bool search_reverse    = true;
     bool outputs_start_pos = false;
 
     if(argc > 3){
         for(int i = 3; i < argc; i++){
-            if(argv[i][1] == 'k')       k                   = atoi(argv[++i]);
-            else if(argv[i][1] == 'l')  slide_letters       = atoi(argv[++i]);
-            else if(argv[i][1] == 'i')  bwt_interval        = atoi(argv[++i]);
-            else if(argv[i][1] == 'm')  max_num_matches     = atoi(argv[++i]);
-            else if(argv[i][1] == 'f')  search_backward     = false;
-            else if(argv[i][1] == 'b')  search_forward      = false;
-            else if(argv[i][1] == 's')  outputs_start_pos   = true;
+            if     (argv[i][1] == 'k') kmer_size         = atoi(argv[++i]);
+            else if(argv[i][1] == 'l') slide_letters     = atoi(argv[++i]);
+            else if(argv[i][1] == 'i') bwt_interval      = atoi(argv[++i]);
+            else if(argv[i][1] == 'm') max_num_matches   = atoi(argv[++i]);
+            else if(argv[i][1] == 'f') search_reverse    = false;
+            else if(argv[i][1] == 'r') search_forward    = false;
+            else if(argv[i][1] == 's') outputs_start_pos = true;
         }
     }
 
-    // Load sequences from Fastsa files
     seq1_size_ = get_seq_length(seq1_file) + 1;
     seq2_size_ = get_seq_length(seq2_file) + 1;
     seq1_ = read_fasta_and_create_int8_t_array(seq1_file, seq1_size_);
     seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
 
-    // Create BWT from seq1
     int* SA = create_SA(seq1_file, seq1_size_);
     BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
 
-    // Search forward matches
-    if(search_forward){
-        stringstream out_file;
-        if(outputs_start_pos)
-            out_file << "alignments-forward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
-        else
-            out_file << "alignments-forward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
-        ofstream ofs(out_file.str().c_str());
+    if(search_forward) search_forward_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
+    if(search_reverse) search_reverse_matches(seq1_name, seq2_name, SA, bwt, kmer_size, slide_letters, max_num_matches, outputs_start_pos);
 
-        ofs << "#" << seq2_file << "\t" << seq1_file << endl;  // header
-        for(int i = 0; i < seq2_size_ - k; i += slide_letters){
-            int8_t* query = &seq2_[i];
-            int lb, ub;  // lower-bound and upper-bound of matches in suffix array
-            bwt.search(query, k, lb, ub);
-            if(lb <= ub){
-                for(int j = lb; j <= ub; j++){
-                    if(j == lb + max_num_matches) break;
-                    if(outputs_start_pos)
-                        output_startpos(ofs, i, SA[j]);
-                    else
-                        output_alignment_forward(ofs, i, SA[j], k);
-                }
-            }
-        }
-    }
-
-    // Search reverse complement matches
-    if(search_backward){
-        stringstream out_file;
-        if(outputs_start_pos)
-            out_file << "alignments-backward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
-        else
-            out_file << "alignments-backward-for-chaining_" << seq1_name << "_" << seq2_name << ".tsv";
-        ofstream ofs(out_file.str().c_str());
-
-        ofs << "#" << seq2_file << "\t" << seq1_file << endl;  // header
-        int8_t* query = new int8_t[k];
-        for(int i = k-1; i < seq2_size_ - 1; i += slide_letters){
-            // convert k-mers to reverse complements
-            for(int j = 0; j < k; j++)
-                query[j] = num_char_ - seq2_[i-j];
-
-            int lb, ub;  // lower-bound and upper-bound of matches in suffix array
-            bwt.search(query, k, lb, ub);
-            if(lb <= ub){
-                for(int j = lb; j <= ub; j++){
-                    if(j == lb + max_num_matches) break;
-                    if(outputs_start_pos)
-                        output_startpos(ofs, i, SA[j]);
-                    else
-                        output_alignment_backward(ofs, i, SA[j], k);
-                }
-            }
-        }
-        delete[] query;
-    }
     delete SA;
 }
 

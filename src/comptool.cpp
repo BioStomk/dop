@@ -114,51 +114,44 @@ int* CompTool::create_SA(const char* file){
 }
 
 
-// argv[1]: seq1, argv[2]: seq2
-// (OPTION)
-// [-k k-mer] : k-mer
-// [-l slide_letters] : k-mer の query を取るとき何文字ずつずらすか
-// [-m max_num_matches] : query に対するマッチの数が何個のものまで出力するか
-// [-i] : bwt_interval
-// [-s] : outputs start position
-// [-f] : searches forward only
-// [-b] : searches backward only
 void CompTool::search_alignment(int argc, char** argv, int* SA){
     if(argc < 3) {cout << "File not enough" << endl; exit(1);}
 
     const string seq1_file = argv[1];
     const string seq2_file = argv[2];
+    const string seq1_name = basename(seq1_file);
+    const string seq2_name = basename(seq2_file);
 
-    // Set default values for options
-    int k = 15;
-    int bwt_interval = 1;
-    int slide_letters = 1;
-    int max_num_matches = 1000000000;
-    bool search_forward = true;
-    bool search_backward = true;
+    // Options
+    int  k                 = 15;
+    int  slide_letters     = 1;
+    int  bwt_interval      = 1;
+    int  max_num_matches   = 1000000000;
+    bool search_forward    = true;
+    bool search_backward   = true;
     bool outputs_start_pos = false;
 
     if(argc > 3){
         for(int i = 3; i < argc; i++){
             if(argv[i][1] == 'k')       k                   = atoi(argv[++i]);
             else if(argv[i][1] == 'l')  slide_letters       = atoi(argv[++i]);
-            else if(argv[i][1] == 'm')  max_num_matches     = atoi(argv[++i]);
             else if(argv[i][1] == 'i')  bwt_interval        = atoi(argv[++i]);
+            else if(argv[i][1] == 'm')  max_num_matches     = atoi(argv[++i]);
             else if(argv[i][1] == 'f')  search_backward     = false;
             else if(argv[i][1] == 'b')  search_forward      = false;
             else if(argv[i][1] == 's')  outputs_start_pos   = true;
         }
     }
+
     // Create BWT from seq1
     BWT bwt(seq1_, SA, seq1_size_, num_char_, bwt_interval);
 
+    // Load seq2
     seq2_size_ = get_seq_length(seq2_file) + 1;
     seq2_ = read_fasta_and_create_int8_t_array(seq2_file, seq2_size_);
 
     // Search forward matches
     if(search_forward){
-        const string seq1_name = basename(seq1_file);
-        const string seq2_name = basename(seq2_file);
         stringstream out_file;
         if(outputs_start_pos)
             out_file << "alignments-forward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";
@@ -185,8 +178,6 @@ void CompTool::search_alignment(int argc, char** argv, int* SA){
 
     // Search reverse complement matches
     if(search_backward){
-        const string seq1_name = basename(seq1_file);
-        const string seq2_name = basename(seq2_file);
         stringstream out_file;
         if(outputs_start_pos)
             out_file << "alignments-backward-startpos_" << seq1_name << "_" << seq2_name << ".tsv";

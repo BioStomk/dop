@@ -135,7 +135,7 @@ int* CompTool::create_SA(const string file, const int size){
 
 void CompTool::search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
                                       const int kmer_size, const int slide_letters, const int max_num_matches){
-    string out_file = seq1_name + "__" + seq2_name + ".match.forward";
+    const string out_file = seq1_name + "__" + seq2_name + ".match.forward";
     ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
@@ -156,7 +156,7 @@ void CompTool::search_forward_matches(const string seq1_name, const string seq2_
 
 void CompTool::search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
                                       const int kmer_size, const int slide_letters, const int max_num_matches){
-    string out_file = seq1_name + "__" + seq2_name + ".match.reverse";
+    const string out_file = seq1_name + "__" + seq2_name + ".match.reverse";
     ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
@@ -199,21 +199,18 @@ void CompTool::chain(int argc, char** argv){
     const string seq1_name = basename(seq1_file);
     const string seq2_name = basename(seq2_file);
 
-    stringstream out_file;
-    out_file << seq1_name << "__" << seq2_name << ".chain";
-    ofstream ofs(out_file.str().c_str());
+    const string out_file = seq1_name + "__" + seq2_name + ".chain";
+    ofstream ofs(out_file.c_str());
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;
 
     if(runs_forward){
-        stringstream ifs_name;
-        ifs_name << seq1_name << "__" << seq2_name << ".match.forward";
-        run_chaining(ifs_name.str(), ofs, near_dist, true);
+        const string ifs_name = seq1_name + "__" + seq2_name + ".match.forward";
+        run_chaining(ifs_name, ofs, near_dist, true);
     }
 
     if(runs_backward){
-        stringstream ifs_name;
-        ifs_name << seq1_name << "__" << seq2_name << ".match.reverse";
-        run_chaining(ifs_name.str(), ofs, near_dist, false);
+        const string ifs_name = seq1_name + "__" + seq2_name + ".match.reverse";
+        run_chaining(ifs_name, ofs, near_dist, false);
     }
 }
 

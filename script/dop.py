@@ -68,8 +68,8 @@ out_file = os.path.join(args.outdir, out_filename)
 script_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(os.path.dirname(script_dir), 'src')
 
-f_match_file = '%s__%s.match.forward' % (t_seq_filename, q_seq_filename)
-b_match_file = '%s__%s.match.reverse' % (t_seq_filename, q_seq_filename)
+f_match_file = '%s__%s.match.%d.forward' % (t_seq_filename, q_seq_filename, args.kmer_size)
+b_match_file = '%s__%s.match.%d.reverse' % (t_seq_filename, q_seq_filename, args.kmer_size)
 
 if not (os.path.exists(f_match_file) and os.path.exists(b_match_file)) or args.recalculate_match:
     cmd = '%s/comptool search %s %s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)

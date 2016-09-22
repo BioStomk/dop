@@ -135,7 +135,7 @@ int* CompTool::create_SA(const string file, const int size){
 
 void CompTool::search_forward_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
                                       const int kmer_size, const int slide_letters, const int max_num_matches){
-    const string out_file = seq1_name + "__" + seq2_name + ".match.forward";
+    const string out_file = seq1_name + "__" + seq2_name + ".match." + to_string(kmer_size) + ".forward";
     ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header
@@ -156,7 +156,7 @@ void CompTool::search_forward_matches(const string seq1_name, const string seq2_
 
 void CompTool::search_reverse_matches(const string seq1_name, const string seq2_name, int* SA, BWT& bwt,
                                       const int kmer_size, const int slide_letters, const int max_num_matches){
-    const string out_file = seq1_name + "__" + seq2_name + ".match.reverse";
+    const string out_file = seq1_name + "__" + seq2_name + ".match." + to_string(kmer_size) + ".reverse";
     ofstream ofs(out_file.c_str());
 
     ofs << "#" << seq2_name << "\t" << seq1_name << endl;  // header

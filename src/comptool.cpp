@@ -7,7 +7,7 @@ int main(int argc, char** argv){
 }
 
 
-string basename(const string& path){
+string basename(const string path){
     return path.substr(path.find_last_of('/') + 1);
 }
 

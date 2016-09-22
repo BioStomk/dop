@@ -71,7 +71,7 @@ f_match_file = 'alignments-forward-startpos_%s_%s.tsv'  % (t_seq_filename, q_seq
 b_match_file = 'alignments-backward-startpos_%s_%s.tsv' % (t_seq_filename, q_seq_filename)
 
 if not (os.path.exists(f_match_file) and os.path.exists(b_match_file)) or args.recalculate_match:
-    cmd = '%s/comptool align %s %s -s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)
+    cmd = '%s/comptool search %s %s -s -k %d' % (src_dir, t_seq_file, q_seq_file, args.kmer_size)
     subprocess.check_call(cmd, shell=True)
 
 def get_seq_len(seq_file):

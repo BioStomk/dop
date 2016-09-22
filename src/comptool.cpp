@@ -72,16 +72,16 @@ int8_t* read_fasta_and_create_int8_t_array(const string file, const int size){
 void CompTool::run_command(int argc, char** argv){
     argc--; argv++;
     const string command = argv[0];
-    if(command == "align")
-        search_alignment(argc, argv);
+    if(command == "search")
+        search(argc, argv);
     else if(command == "chain")
-        chain_alignment(argc, argv);
+        chain(argc, argv);
     else
         cout << "Unknown command: \"" << command << "\"" << endl;
 }
 
 
-void CompTool::search_alignment(int argc, char** argv){
+void CompTool::search(int argc, char** argv){
     if(argc < 3) {cout << "File not enough" << endl; exit(1);}
 
     const string seq1_file = argv[1];
@@ -193,25 +193,23 @@ void CompTool::search_reverse_matches(const string seq1_name, const string seq2_
 }
 
 
-// argv[1]: seq1, argv[2]: seq2
-// (OPTION) [-n]: near_dist
-// [-f]: runs forward only, [-b]: runs backward only
-void CompTool::chain_alignment(int argc, char** argv){
+void CompTool::chain(int argc, char** argv){
     if(argc < 3) {cout << "Files not enough" << endl; exit(1);}
-    // OPTION
-    int near_dist = 50;
-    bool runs_forward = true;
+
+    // Options
+    int  near_dist     = 50;
+    bool runs_forward  = true;
     bool runs_backward = true;
+
     if(argc > 3){
         for(int i = 3; i < argc; i++)
-            if(argv[i][1] == 'n')  near_dist = atoi(argv[++i]);
+            if     (argv[i][1] == 'n')  near_dist     = atoi(argv[++i]);
             else if(argv[i][1] == 'f')  runs_backward = false;
-            else if(argv[i][1] == 'b')  runs_forward = false;
+            else if(argv[i][1] == 'b')  runs_forward  = false;
     }
 
     const string seq1_file = argv[1];
     const string seq2_file = argv[2];
-
     const string seq1_name = basename(seq1_file);
     const string seq2_name = basename(seq2_file);
 

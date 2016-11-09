@@ -28,8 +28,8 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, f_file, b_file, out_file, draw
     cmd += 'unset xtics;'
 
     if linear_scale:
-        x_size = x_len / 30
-        y_size = y_len / 30
+        x_size = x_len / 100
+        y_size = y_len / 100
     else:
         if x_len > y_len:
             x_size = 100 * math.log(x_len, 2)

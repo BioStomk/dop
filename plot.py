@@ -38,7 +38,7 @@ def plot(x_name, y_name, x_len, y_len, kmer_size, f_file, b_file, out_file, draw
             y_size = 100 * math.log(y_len, 2)
             x_size = y_size * x_len / y_len
 
-    cmd += 'set size ratio %f;' % (float(x_len) / y_len)
+    cmd += 'set size ratio %f;' % (float(y_len) / x_len)
     cmd += 'set terminal png size %d, %d;' % (x_size, y_size)
     cmd += "set output '%s';" % out_file
 

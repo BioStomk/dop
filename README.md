@@ -1,6 +1,10 @@
 # dop
 A program for drawing dot plot by finding k-mer matches of two DNA sequences
 
+## Prerequisits
+- Python (2.7.x)
+- Gnuplot
+
 ## Installation
 
 ```sh
